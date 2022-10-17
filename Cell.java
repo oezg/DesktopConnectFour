@@ -4,6 +4,9 @@ import javax.swing.*;
 import java.awt.*;
 
 public class Cell extends JButton {
+
+    public static final Color BACKGROUND = Color.LIGHT_GRAY;
+    public static final Color HIGHLIGHT = Color.CYAN;
     private int row;
     private int column;
     private Content content;
@@ -15,7 +18,7 @@ public class Cell extends JButton {
         setName("Button" + (char) ('A' + j) + (i + 1));
         setText();
         setFocusPainted(false);
-        setBackground(Color.LIGHT_GRAY);
+        setBackground();
     }
 
     private void setText() {
@@ -41,5 +44,17 @@ public class Cell extends JButton {
 
     boolean isEmpty() {
         return this.content.equals(Content.EMPTY);
+    }
+
+    void highlight() {
+        setBackground(HIGHLIGHT);
+    }
+
+    void setBackground() {
+        setBackground(BACKGROUND);
+    }
+    void reset() {
+        setContent(Content.EMPTY);
+        setBackground();
     }
 }

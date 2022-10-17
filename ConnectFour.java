@@ -61,9 +61,10 @@ public class ConnectFour extends JFrame implements ActionListener {
         this.turn = 0;
     }
     private void resetBoard() {
+        Cell cell;
         for (int i = ROWS - 1; i >= 0; i--) {
             for (int j = 0; j < COLS; j++) {
-                this.board[i][j].setContent(Content.EMPTY);
+                this.board[i][j].reset();
             }
         }
     }
@@ -80,55 +81,129 @@ public class ConnectFour extends JFrame implements ActionListener {
         }
         Content content = this.contents[this.turn++ % 2];
         int column = selectedCell.getColumn();
-        for (int row = 0; row < ROWS; row++) {
+        int row = 0;
+        for (; row < ROWS; row++) {
             if (this.board[row][column].isEmpty()) {
-                this.board[row][column].setContent(content);
+                selectedCell = this.board[row][column];
+                selectedCell.setContent(content);
                 break;
             }
         }
 
-        if (isGameOver(selectedCell)) {
-            changeColorWinningCells(selectedCell);
+        if (row < ROWS && isGameOver(selectedCell)) {
             setGameOver(true);
         }
     }
 
     private boolean isGameOver(Cell cell) {
-        boolean vertical = isVerticalConnectedFour(cell);
-        boolean horizontal = isHorizontalConnectedFour(cell);
-        boolean diagonal = isDiagonalConnectedFour(cell);
-        return vertical || horizontal || diagonal;
-    }
-
-    private boolean isVerticalConnectedFour(Cell cell) {
-//        TODO
+        int i = cell.getRow();
+        int j = cell.getColumn();
+        Content content = cell.getContent();
+        List<Cell> cells = null;
+        cells = isVerticalConnectedFour(i, j, content);
+        if (cells != null) {
+            cells.add(cell);
+            cells.forEach(connectedCell -> connectedCell.highlight());
+            return true;
+        }
+        cells = isHorizontalConnectedFour(i, j, content);
+        if (cells != null) {
+            cells.add(cell);
+            cells.forEach(connectedCell -> connectedCell.highlight());
+            return true;
+        }
+        cells = isDescendingDiagonalConnectedFour(i, j, content);
+        if (cells != null) {
+            cells.add(cell);
+            cells.forEach(connectedCell -> connectedCell.highlight());
+            return true;
+        }
+        cells = isAscendingDiagonalConnectedFour(i, j, content);
+        if (cells != null) {
+            cells.add(cell);
+            cells.forEach(connectedCell -> connectedCell.highlight());
+            return true;
+        }
         return false;
     }
 
-    private boolean isHorizontalConnectedFour(Cell cell) {
-//        TODO
-        return false;
-    }
-
-    private boolean isDiagonalConnectedFour(Cell cell) {
-//        TODO
-        return false;
-    }
-
-    private List<Cell> connectedCells(Cell cell) {
+    private List<Cell> isVerticalConnectedFour(int i, int j, Content content) {
+        if (i < 3) {
+            return null;
+        }
+        for (int k = 1; k < 4; k++) {
+            Content other = this.board[i - k][j].getContent();
+            if (content != other) {
+                return null;
+            }
+        }
         List<Cell> cells = new ArrayList<>();
-        cells.add(cell);
-        if (isVerticalConnectedFour(cell)) {
-//            TODO
-        } else if (isHorizontalConnectedFour(cell)) {
-//            TODO
-        } else {
-//            TODO
+        for (int k = 0; k < 4; k++) {
+            cells.add(this.board[i - k][j]);
         }
         return cells;
     }
 
-    private void changeColorWinningCells(Cell cell) {
-        connectedCells(cell).forEach(winningCell -> winningCell.setBackground(Color.cyan));
+    private List<Cell> isHorizontalConnectedFour(int i, int j, Content content) {
+        List<Cell> cells = new ArrayList<>();
+        for (int k = 1; k < 4 && k <= j; k++) {
+            Cell left = this.board[i][j - k];
+            if (left.getContent() == content) {
+                cells.add(left);
+            } else {
+                break;
+            }
+        }
+        for (int k = 1; k < 4 && k + j < COLS; k++) {
+            Cell right = this.board[i][j + k];
+            if (right.getContent() == content) {
+                cells.add(right);
+            } else {
+                break;
+            }
+        }
+        return cells.size() < 3 ? null : cells;
+    }
+
+    private List<Cell> isAscendingDiagonalConnectedFour(int i, int j, Content content) {
+        List<Cell> cells = new ArrayList<>();
+        for (int k = 1; k < 4 && k <= j && k <= i; k++) {
+            Cell leftDown = this.board[i - k][j - k];
+            if (leftDown.getContent() == content) {
+                cells.add(leftDown);
+            } else {
+                break;
+            }
+        }
+        for (int k = 1; k < 4 && k + j < COLS && k + i < ROWS; k++) {
+            Cell rightUp = this.board[i + k][j + k];
+            if (rightUp.getContent() == content) {
+                cells.add(rightUp);
+            } else {
+                break;
+            }
+        }
+        return cells.size() < 3 ? null : cells;
+    }
+
+    private List<Cell> isDescendingDiagonalConnectedFour(int i, int j, Content content) {
+        List<Cell> cells = new ArrayList<>();
+        for (int k = 1; k < 4 && k <= j && i + k < ROWS; k++) {
+            Cell leftUp = this.board[i + k][j - k];
+            if (leftUp.getContent() == content) {
+                cells.add(leftUp);
+            } else {
+                break;
+            }
+        }
+        for (int k = 1; k < 4 && k + j < COLS && k <= i; k++) {
+            Cell rightDown = this.board[i - k][j + k];
+            if (rightDown.getContent() == content) {
+                cells.add(rightDown);
+            } else {
+                break;
+            }
+        }
+        return cells.size() < 3 ? null : cells;
     }
 }
